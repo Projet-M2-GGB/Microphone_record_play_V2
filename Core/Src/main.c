@@ -69,6 +69,7 @@ typedef struct {
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
+
 #define AUDIO_BLOCK_SIZE   ((uint32_t)0xFFFE)
 #define AUDIO_NB_BLOCKS    ((uint32_t)4)
 
@@ -86,7 +87,6 @@ typedef struct {
 #define CAMERA_FRAME_BUFFER       ((uint32_t)(LCD_FRAME_BUFFER + (RK043FN48H_WIDTH * RK043FN48H_HEIGHT * ARBG8888_BYTE_PER_PIXEL)))
 #define SDRAM_WRITE_READ_ADDR        ((uint32_t)(CAMERA_FRAME_BUFFER + (CAMERA_RES_MAX_X * CAMERA_RES_MAX_Y * RGB565_BYTE_PER_PIXEL)))
 #define AUDIO_REC_START_ADDR         SDRAM_WRITE_READ_ADDR
-
 
 /* USER CODE END PD */
 
@@ -243,18 +243,22 @@ int main(void)
 		  printf("stopped recording\r\n");
 		  BSP_AUDIO_IN_Stop(CODEC_PDWN_SW);
 
-		  if(button_pressed == 1)
+		  while (button_pressed == 0)
 		  {
-			button_pressed = 0;
-			printf("playing recording...\r\n");
-			/* -----------Start Playback -------------- */
-			/* Initialize audio IN at REC_FREQ*/
-			BSP_AUDIO_OUT_Init(OUTPUT_DEVICE_HEADPHONE, 70, DEFAULT_AUDIO_IN_FREQ);
-			BSP_AUDIO_OUT_SetAudioFrameSlot(CODEC_AUDIOFRAME_SLOT_02);
+			  if(button_pressed == 1)
+					  {
+						button_pressed = 0;
+						printf("playing recording...\r\n");
+						/* -----------Start Playback -------------- */
+						/* Initialize audio IN at REC_FREQ*/
+						BSP_AUDIO_OUT_Init(OUTPUT_DEVICE_HEADPHONE, 70, DEFAULT_AUDIO_IN_FREQ);
+						BSP_AUDIO_OUT_SetAudioFrameSlot(CODEC_AUDIOFRAME_SLOT_02);
 
-			/* Play the recorded buffer*/
-			AUDIO_Start(AUDIO_REC_START_ADDR, AUDIO_BLOCK_SIZE * AUDIO_NB_BLOCKS * 2);  /* Use Audio play demo to playback sound */
+						/* Play the recorded buffer*/
+						AUDIO_Start(AUDIO_REC_START_ADDR, AUDIO_BLOCK_SIZE * AUDIO_NB_BLOCKS * 2);  /* Use Audio play demo to playback sound */
+					  }
 		  }
+
 	  }
   }
   /* USER CODE END 3 */
