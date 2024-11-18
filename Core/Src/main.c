@@ -22,6 +22,7 @@
 #include "sai.h"
 #include "usart.h"
 #include "gpio.h"
+#include "fmc.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -169,6 +170,7 @@ int main(void)
   MX_DMA_Init();
   MX_USART1_UART_Init();
   MX_SAI1_Init();
+  MX_FMC_Init();
   /* USER CODE BEGIN 2 */
 
   /* Initialize Audio Recorder */
@@ -188,12 +190,12 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-	  check_button_release(); // test
+	  check_button_release();
 	  printf("Waiting for input to record...\r\n");
 	  HAL_Delay(1000);
 	  if (button_pressed == 1)
 	  {
-		  button_pressed = 0;
+		  check_button_release();
 		  printf("recording...\r\n");
 		  /* Start Recording */
 		  BSP_AUDIO_IN_Record(internal_buffer, AUDIO_BLOCK_SIZE);
@@ -205,7 +207,7 @@ int main(void)
 		      printf("Waiting for BUFFER_OFFSET_HALF...\r\n");
 		      if (button_pressed == 1)
 		      {
-		    	button_pressed = 0;
+		    	check_button_release();
 		        /* Stop Player before close Test */
 		        BSP_AUDIO_OUT_Stop(CODEC_PDWN_SW);
 		        return;
@@ -226,7 +228,7 @@ int main(void)
 		    {
 		      if (button_pressed == 1)
 		      {
-		    	button_pressed = 0;
+			    check_button_release();
 		        /* Stop Player before close Test */
 		        BSP_AUDIO_OUT_Stop(CODEC_PDWN_SW);
 		        return;
@@ -247,7 +249,7 @@ int main(void)
 		  {
 			  if(button_pressed == 1)
 					  {
-						button_pressed = 0;
+				  	    check_button_release();
 						printf("playing recording...\r\n");
 						/* -----------Start Playback -------------- */
 						/* Initialize audio IN at REC_FREQ*/
