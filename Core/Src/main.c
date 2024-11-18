@@ -188,7 +188,7 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-	  check_button_release();
+	  check_button_release(); // test
 	  printf("Waiting for input to record...\r\n");
 	  HAL_Delay(1000);
 	  if (button_pressed == 1)
