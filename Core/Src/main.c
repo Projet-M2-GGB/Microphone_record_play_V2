@@ -74,20 +74,24 @@ typedef struct {
 #define AUDIO_BLOCK_SIZE   ((uint32_t)0xFFFE)
 #define AUDIO_NB_BLOCKS    ((uint32_t)4)
 
+/*
 #define CAMERA_RES_MAX_X          640
 #define CAMERA_RES_MAX_Y          480
 
 #define RGB565_BYTE_PER_PIXEL     2
 #define ARBG8888_BYTE_PER_PIXEL   4
 
-#define  RK043FN48H_WIDTH    ((uint16_t)480)          /* LCD PIXEL WIDTH            */
-#define  RK043FN48H_HEIGHT   ((uint16_t)272)          /* LCD PIXEL HEIGHT           */
+#define  RK043FN48H_WIDTH    ((uint16_t)480)
+#define  RK043FN48H_HEIGHT   ((uint16_t)272)
+*/
 
 #define SDRAM_DEVICE_ADDR  ((uint32_t)0xC0000000)
+/*
 #define LCD_FRAME_BUFFER          SDRAM_DEVICE_ADDR
 #define CAMERA_FRAME_BUFFER       ((uint32_t)(LCD_FRAME_BUFFER + (RK043FN48H_WIDTH * RK043FN48H_HEIGHT * ARBG8888_BYTE_PER_PIXEL)))
 #define SDRAM_WRITE_READ_ADDR        ((uint32_t)(CAMERA_FRAME_BUFFER + (CAMERA_RES_MAX_X * CAMERA_RES_MAX_Y * RGB565_BYTE_PER_PIXEL)))
-#define AUDIO_REC_START_ADDR         SDRAM_WRITE_READ_ADDR
+*/
+#define AUDIO_REC_START_ADDR         SDRAM_DEVICE_ADDR
 
 /* USER CODE END PD */
 
@@ -114,6 +118,9 @@ static uint16_t  internal_buffer[AUDIO_BLOCK_SIZE];
 uint32_t  audio_rec_buffer_state;
 
 extern SAI_HandleTypeDef haudio_in_sai;
+extern DMA_HandleTypeDef hdma_sai1_a;
+
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -171,6 +178,7 @@ int main(void)
   MX_GPIO_Init();
   MX_DMA_Init();
   MX_USART1_UART_Init();
+  printf("DMA State: %d\r\n", HAL_DMA_GetState(&hdma_sai1_a));
   MX_SAI1_Init();
   MX_FMC_Init();
   /* USER CODE BEGIN 2 */
@@ -206,8 +214,8 @@ int main(void)
 		    /* Wait end of half block recording */
 		    while(audio_rec_buffer_state != BUFFER_OFFSET_HALF)
 		    {
-		      printf("Waiting for BUFFER_OFFSET_HALF...\r\n");
-		      HAL_Delay(1000);
+		      //printf("Waiting for BUFFER_OFFSET_HALF...\r\n");
+		      //HAL_Delay(1000);
 		      if (button_pressed == 1)
 		      {
 		    	check_button_release();
@@ -221,11 +229,18 @@ int main(void)
 
 		    /* Copy recorded 1st half block in SDRAM */
 
-		    printf("Copying data to memory...\r\n");
-		    memcpy((uint32_t *)(AUDIO_REC_START_ADDR + (block_number * AUDIO_BLOCK_SIZE * 2)),
-		           internal_buffer,
-		           AUDIO_BLOCK_SIZE);
-		    printf("Copy complete.\r\n");
+		    printf("DMA State: %d\r\n", HAL_DMA_GetState(&hdma_sai1_a));
+
+		    printf("DMA Error: %lu\r\n", HAL_DMA_GetError(&hdma_sai1_a));
+
+		    if (HAL_DMA_GetState(&haudio_in_sai) == HAL_DMA_STATE_READY) {
+		        // DMA is ready, it's safe to use memcpy
+			    printf("Copying data to memory...\r\n");
+			    memcpy((uint32_t *)(AUDIO_REC_START_ADDR + (block_number * AUDIO_BLOCK_SIZE * 2)),
+			           internal_buffer,
+			           AUDIO_BLOCK_SIZE);
+			    printf("Copy complete.\r\n");
+		    }
 
 
 		    /* Wait end of one block recording */
@@ -242,29 +257,41 @@ int main(void)
 		    audio_rec_buffer_state = BUFFER_OFFSET_NONE;
 		    /* Copy recorded 2nd half block in SDRAM */
 
-		    memcpy((uint32_t *)(AUDIO_REC_START_ADDR + (block_number * AUDIO_BLOCK_SIZE * 2) + (AUDIO_BLOCK_SIZE)),
-		           (uint16_t *)(&internal_buffer[AUDIO_BLOCK_SIZE/2]),
-		           AUDIO_BLOCK_SIZE);
+
+
+		    if (HAL_DMA_GetState(&hdma_sai1_a) == HAL_DMA_STATE_READY) {
+		        // DMA is ready, it's safe to use memcpy
+		    	printf("Copying data to memory...\r\n");
+			    memcpy((uint32_t *)(AUDIO_REC_START_ADDR + (block_number * AUDIO_BLOCK_SIZE * 2)),
+			           internal_buffer,
+			           AUDIO_BLOCK_SIZE);
+			    printf("Copy complete.\r\n");
+		    }
+
 
 		  }
 		  printf("stopped recording\r\n");
 		  BSP_AUDIO_IN_Stop(CODEC_PDWN_SW);
 
+		  printf("playing recording...\r\n");
+		  /* -----------Start Playback -------------- */
+		  /* Initialize audio IN at REC_FREQ*/
+		  BSP_AUDIO_OUT_Init(OUTPUT_DEVICE_HEADPHONE, 70, DEFAULT_AUDIO_IN_FREQ);
+		  BSP_AUDIO_OUT_SetAudioFrameSlot(CODEC_AUDIOFRAME_SLOT_02);
+
+		  /* Play the recorded buffer*/
+		  AUDIO_Start(AUDIO_REC_START_ADDR, AUDIO_BLOCK_SIZE * AUDIO_NB_BLOCKS * 2);  /* Use Audio play demo to playback sound */
+		  printf("playback end...\r\n");
+
+		  /*
 		  while (button_pressed == 0)
 		  {
 			  if(button_pressed == 1)
 					  {
-				  	    check_button_release();
-						printf("playing recording...\r\n");
-						/* -----------Start Playback -------------- */
-						/* Initialize audio IN at REC_FREQ*/
-						BSP_AUDIO_OUT_Init(OUTPUT_DEVICE_HEADPHONE, 70, DEFAULT_AUDIO_IN_FREQ);
-						BSP_AUDIO_OUT_SetAudioFrameSlot(CODEC_AUDIOFRAME_SLOT_02);
 
-						/* Play the recorded buffer*/
-						AUDIO_Start(AUDIO_REC_START_ADDR, AUDIO_BLOCK_SIZE * AUDIO_NB_BLOCKS * 2);  /* Use Audio play demo to playback sound */
 					  }
 		  }
+		  */
 
 	  }
   }
@@ -284,7 +311,6 @@ void SystemClock_Config(void)
   */
   __HAL_RCC_PWR_CLK_ENABLE();
   __HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE1);
-  __HAL_RCC_SAI1_CLK_ENABLE();
 
   /** Initializes the RCC Oscillators according to the specified parameters
   * in the RCC_OscInitTypeDef structure.
@@ -294,7 +320,7 @@ void SystemClock_Config(void)
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
   RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
   RCC_OscInitStruct.PLL.PLLM = 25;
-  RCC_OscInitStruct.PLL.PLLN = 400;
+  RCC_OscInitStruct.PLL.PLLN = 432;
   RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV2;
   RCC_OscInitStruct.PLL.PLLQ = 9;
   if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
@@ -318,7 +344,7 @@ void SystemClock_Config(void)
   RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV4;
   RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV2;
 
-  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_6) != HAL_OK)
+  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_7) != HAL_OK)
   {
     Error_Handler();
   }
@@ -365,10 +391,16 @@ static uint32_t GetData(void *pdata, uint32_t offset, uint8_t *pbuf, uint32_t Nb
   uint32_t ReadDataNbr;
 
   ReadDataNbr = 0;
+  printf("offset: %lu, AudioFileSize: %lu, NbrOfData: %lu\r\n", offset, AudioFileSize, NbrOfData);
+
+  printf("pdata: %p, pbuf: %p\n", pdata, pbuf);
+  printf("buffer ctl.buff : %p", buffer_ctl.buff);
+
   while(((offset + ReadDataNbr) < AudioFileSize) && (ReadDataNbr < NbrOfData))
   {
     pbuf[ReadDataNbr]= lptr [offset + ReadDataNbr];
     ReadDataNbr++;
+    printf("looptest");
   }
   return ReadDataNbr;
 }
