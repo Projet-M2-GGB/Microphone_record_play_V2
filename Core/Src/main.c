@@ -112,6 +112,8 @@ static uint32_t AudioFreq[9] = {8000 ,11025, 16000, 22050, 32000, 44100, 48000, 
 
 static uint16_t  internal_buffer[AUDIO_BLOCK_SIZE];
 uint32_t  audio_rec_buffer_state;
+
+extern SAI_HandleTypeDef haudio_in_sai;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -205,6 +207,7 @@ int main(void)
 		    while(audio_rec_buffer_state != BUFFER_OFFSET_HALF)
 		    {
 		      printf("Waiting for BUFFER_OFFSET_HALF...\r\n");
+		      HAL_Delay(1000);
 		      if (button_pressed == 1)
 		      {
 		    	check_button_release();
@@ -218,9 +221,11 @@ int main(void)
 
 		    /* Copy recorded 1st half block in SDRAM */
 
+		    printf("Copying data to memory...\r\n");
 		    memcpy((uint32_t *)(AUDIO_REC_START_ADDR + (block_number * AUDIO_BLOCK_SIZE * 2)),
 		           internal_buffer,
 		           AUDIO_BLOCK_SIZE);
+		    printf("Copy complete.\r\n");
 
 
 		    /* Wait end of one block recording */
@@ -279,6 +284,7 @@ void SystemClock_Config(void)
   */
   __HAL_RCC_PWR_CLK_ENABLE();
   __HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE1);
+  __HAL_RCC_SAI1_CLK_ENABLE();
 
   /** Initializes the RCC Oscillators according to the specified parameters
   * in the RCC_OscInitTypeDef structure.

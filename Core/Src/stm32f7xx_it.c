@@ -22,6 +22,7 @@
 #include "stm32f7xx_it.h"
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include "stm32746g_discovery_audio.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -216,6 +217,8 @@ void EXTI15_10_IRQHandler(void)
 /**
   * @brief This function handles DMA2 stream1 global interrupt.
   */
+
+
 void DMA2_Stream1_IRQHandler(void)
 {
   /* USER CODE BEGIN DMA2_Stream1_IRQn 0 */
@@ -226,6 +229,7 @@ void DMA2_Stream1_IRQHandler(void)
 
   /* USER CODE END DMA2_Stream1_IRQn 1 */
 }
+
 
 /**
   * @brief This function handles SAI1 global interrupt.
@@ -242,5 +246,9 @@ void SAI1_IRQHandler(void)
 }
 
 /* USER CODE BEGIN 1 */
-
+void AUDIO_IN_SAIx_DMAx_IRQHandler()
+{
+	extern SAI_HandleTypeDef haudio_in_sai;
+	HAL_DMA_IRQHandler(haudio_in_sai.hdmarx);
+}
 /* USER CODE END 1 */

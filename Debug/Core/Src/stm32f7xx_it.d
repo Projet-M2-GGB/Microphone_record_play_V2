@@ -30,7 +30,11 @@ Core/Src/stm32f7xx_it.o: ../Core/Src/stm32f7xx_it.c ../Core/Inc/main.h \
  ../Drivers/STM32F7xx_HAL_Driver/Inc/stm32f7xx_hal_sai.h \
  ../Drivers/STM32F7xx_HAL_Driver/Inc/stm32f7xx_hal_uart.h \
  ../Drivers/STM32F7xx_HAL_Driver/Inc/stm32f7xx_hal_uart_ex.h \
- ../Core/Inc/stm32f7xx_it.h
+ ../Core/Inc/stm32f7xx_it.h \
+ C:/Users/fabi_/Documents/STM32_Projects/Microphone_record_play_V2/Drivers/BSP/STM32746G-Discovery/stm32746g_discovery_audio.h \
+ C:/Users/fabi_/Documents/STM32_Projects/Microphone_record_play_V2/Drivers/BSP/STM32746G-Discovery/../Components/wm8994/wm8994.h \
+ C:/Users/fabi_/Documents/STM32_Projects/Microphone_record_play_V2/Drivers/BSP/STM32746G-Discovery/../Components/wm8994/../Common/audio.h \
+ C:/Users/fabi_/Documents/STM32_Projects/Microphone_record_play_V2/Drivers/BSP/STM32746G-Discovery/stm32746g_discovery.h
 ../Core/Inc/main.h:
 ../Drivers/STM32F7xx_HAL_Driver/Inc/stm32f7xx_hal.h:
 ../Core/Inc/stm32f7xx_hal_conf.h:
@@ -64,3 +68,7 @@ Core/Src/stm32f7xx_it.o: ../Core/Src/stm32f7xx_it.c ../Core/Inc/main.h \
 ../Drivers/STM32F7xx_HAL_Driver/Inc/stm32f7xx_hal_uart.h:
 ../Drivers/STM32F7xx_HAL_Driver/Inc/stm32f7xx_hal_uart_ex.h:
 ../Core/Inc/stm32f7xx_it.h:
+C:/Users/fabi_/Documents/STM32_Projects/Microphone_record_play_V2/Drivers/BSP/STM32746G-Discovery/stm32746g_discovery_audio.h:
+C:/Users/fabi_/Documents/STM32_Projects/Microphone_record_play_V2/Drivers/BSP/STM32746G-Discovery/../Components/wm8994/wm8994.h:
+C:/Users/fabi_/Documents/STM32_Projects/Microphone_record_play_V2/Drivers/BSP/STM32746G-Discovery/../Components/wm8994/../Common/audio.h:
+C:/Users/fabi_/Documents/STM32_Projects/Microphone_record_play_V2/Drivers/BSP/STM32746G-Discovery/stm32746g_discovery.h:
