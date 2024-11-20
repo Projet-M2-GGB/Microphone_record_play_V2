@@ -33,12 +33,8 @@
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
 
-#define AUDIO_BUFFER_SIZE       512
-#define AUDIO_DEFAULT_VOLUME    70
-
-#define AUDIO_FILE_SIZE               524288
-#define AUDIO_START_OFFSET_ADDRESS    0            /* Offset relative to audio file header size */
-#define AUDIO_FILE_ADDRESS            0x08080000   /* Audio file address */
+#define AUDIO_BUFFER_SIZE       512  // 512 bytes
+#define AUDIO_DEFAULT_VOLUME    70 // 70% volume
 
 typedef enum
 {
@@ -71,27 +67,17 @@ typedef struct {
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
 
+
+#define AUDIO_FILE_SIZE               524288 /* 512 KB , flash size = 1 Mb */
+#define AUDIO_START_OFFSET_ADDRESS    0            /* Offset relative to audio file header size */
+#define AUDIO_FILE_ADDRESS            0x08080000   /* Audio file address, internal flash memory region starting at 512 KB */
+
 #define AUDIO_BLOCK_SIZE   ((uint32_t)0xFFFE)
 #define AUDIO_NB_BLOCKS    ((uint32_t)4)
 
-/*
-#define CAMERA_RES_MAX_X          640
-#define CAMERA_RES_MAX_Y          480
-
-#define RGB565_BYTE_PER_PIXEL     2
-#define ARBG8888_BYTE_PER_PIXEL   4
-
-#define  RK043FN48H_WIDTH    ((uint16_t)480)
-#define  RK043FN48H_HEIGHT   ((uint16_t)272)
-*/
-
 #define SDRAM_DEVICE_ADDR  ((uint32_t)0xC0000000)
-/*
-#define LCD_FRAME_BUFFER          SDRAM_DEVICE_ADDR
-#define CAMERA_FRAME_BUFFER       ((uint32_t)(LCD_FRAME_BUFFER + (RK043FN48H_WIDTH * RK043FN48H_HEIGHT * ARBG8888_BYTE_PER_PIXEL)))
-#define SDRAM_WRITE_READ_ADDR        ((uint32_t)(CAMERA_FRAME_BUFFER + (CAMERA_RES_MAX_X * CAMERA_RES_MAX_Y * RGB565_BYTE_PER_PIXEL)))
-*/
 #define AUDIO_REC_START_ADDR         SDRAM_DEVICE_ADDR
+
 
 /* USER CODE END PD */
 
@@ -103,16 +89,10 @@ typedef struct {
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-static uint16_t  internal_buffer[AUDIO_BLOCK_SIZE];
-
 ALIGN_32BYTES (static AUDIO_BufferTypeDef  buffer_ctl);
 static AUDIO_PLAYBACK_StateTypeDef  audio_state;
 static uint32_t  AudioStartAddress;
 static uint32_t  AudioFileSize;
-__IO uint32_t uwVolume = 20;
-__IO uint32_t uwPauseEnabledStatus = 0;
-
-static uint32_t AudioFreq[9] = {8000 ,11025, 16000, 22050, 32000, 44100, 48000, 96000, 192000};
 
 static uint16_t  internal_buffer[AUDIO_BLOCK_SIZE];
 uint32_t  audio_rec_buffer_state;
@@ -125,6 +105,8 @@ extern DMA_HandleTypeDef hdma_sai1_a;
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
+void PeriphCommonClock_Config(void);
+static void MPU_Config(void);
 /* USER CODE BEGIN PFP */
 #ifdef __GNUC__
 /* With GCC/RAISONANCE, small printf (option LD Linker-
@@ -158,6 +140,9 @@ int main(void)
 
   /* USER CODE END 1 */
 
+  /* MPU Configuration--------------------------------------------------------*/
+  MPU_Config();
+
   /* MCU Configuration--------------------------------------------------------*/
 
   /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
@@ -170,6 +155,9 @@ int main(void)
   /* Configure the system clock */
   SystemClock_Config();
 
+  /* Configure the peripherals common clocks */
+  PeriphCommonClock_Config();
+
   /* USER CODE BEGIN SysInit */
 
   /* USER CODE END SysInit */
@@ -178,9 +166,9 @@ int main(void)
   MX_GPIO_Init();
   MX_DMA_Init();
   MX_USART1_UART_Init();
-  printf("DMA State: %d\r\n", HAL_DMA_GetState(&hdma_sai1_a));
   MX_SAI1_Init();
   MX_FMC_Init();
+  BSP_SDRAM_Init();
   /* USER CODE BEGIN 2 */
 
   /* Initialize Audio Recorder */
@@ -350,6 +338,30 @@ void SystemClock_Config(void)
   }
 }
 
+/**
+  * @brief Peripherals Common Clock Configuration
+  * @retval None
+  */
+void PeriphCommonClock_Config(void)
+{
+  RCC_PeriphCLKInitTypeDef PeriphClkInitStruct = {0};
+
+  /** Initializes the peripherals clock
+  */
+  PeriphClkInitStruct.PeriphClockSelection = RCC_PERIPHCLK_SAI1;
+  PeriphClkInitStruct.PLLSAI.PLLSAIN = 100;
+  PeriphClkInitStruct.PLLSAI.PLLSAIR = 5;
+  PeriphClkInitStruct.PLLSAI.PLLSAIQ = 2;
+  PeriphClkInitStruct.PLLSAI.PLLSAIP = RCC_PLLSAIP_DIV8;
+  PeriphClkInitStruct.PLLSAIDivQ = 1;
+  PeriphClkInitStruct.PLLSAIDivR = RCC_PLLSAIDIVR_8;
+  PeriphClkInitStruct.Sai1ClockSelection = RCC_SAI1CLKSOURCE_PLLSAI;
+  if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInitStruct) != HAL_OK)
+  {
+    Error_Handler();
+  }
+}
+
 /* USER CODE BEGIN 4 */
 
 PUTCHAR_PROTOTYPE
@@ -360,6 +372,7 @@ of transmission */
 HAL_UART_Transmit(&huart1, (uint8_t *)&ch, 1, 100);
 return ch;
 }
+
 
 AUDIO_ErrorTypeDef AUDIO_Start(uint32_t audio_start_address, uint32_t audio_file_size)
 {
@@ -393,14 +406,13 @@ static uint32_t GetData(void *pdata, uint32_t offset, uint8_t *pbuf, uint32_t Nb
   ReadDataNbr = 0;
   printf("offset: %lu, AudioFileSize: %lu, NbrOfData: %lu\r\n", offset, AudioFileSize, NbrOfData);
 
-  printf("pdata: %p, pbuf: %p\n", pdata, pbuf);
-  printf("buffer ctl.buff : %p", buffer_ctl.buff);
+  printf("pdata: %p, pbuf: %p\r\n", pdata, pbuf);
+  printf("buffer ctl.buff : %p\r\n", buffer_ctl.buff);
 
   while(((offset + ReadDataNbr) < AudioFileSize) && (ReadDataNbr < NbrOfData))
   {
     pbuf[ReadDataNbr]= lptr [offset + ReadDataNbr];
     ReadDataNbr++;
-    printf("looptest");
   }
   return ReadDataNbr;
 }
@@ -466,13 +478,41 @@ void BSP_AUDIO_IN_Error_CallBack(void)
   /* .... */
 }
 
-
 void check_button_release()
 {
     if (HAL_GPIO_ReadPin(GPIOI, Button_user_Pin) == GPIO_PIN_RESET) button_pressed = 0;
 }
 
 /* USER CODE END 4 */
+
+ /* MPU Configuration */
+
+void MPU_Config(void)
+{
+  MPU_Region_InitTypeDef MPU_InitStruct = {0};
+
+  /* Disables the MPU */
+  HAL_MPU_Disable();
+
+  /** Initializes and configures the Region and the memory to be protected
+  */
+  MPU_InitStruct.Enable = MPU_REGION_ENABLE;
+  MPU_InitStruct.Number = MPU_REGION_NUMBER0;
+  MPU_InitStruct.BaseAddress = 0xC0000000;
+  MPU_InitStruct.Size = MPU_REGION_SIZE_8MB;
+  MPU_InitStruct.SubRegionDisable = 0x0;
+  MPU_InitStruct.TypeExtField = MPU_TEX_LEVEL0;
+  MPU_InitStruct.AccessPermission = MPU_REGION_FULL_ACCESS;
+  MPU_InitStruct.DisableExec = MPU_INSTRUCTION_ACCESS_ENABLE;
+  MPU_InitStruct.IsShareable = MPU_ACCESS_NOT_SHAREABLE;
+  MPU_InitStruct.IsCacheable = MPU_ACCESS_NOT_CACHEABLE;
+  MPU_InitStruct.IsBufferable = MPU_ACCESS_NOT_BUFFERABLE;
+
+  HAL_MPU_ConfigRegion(&MPU_InitStruct);
+  /* Enables the MPU */
+  HAL_MPU_Enable(MPU_PRIVILEGED_DEFAULT);
+
+}
 
 /**
   * @brief  This function is executed in case of error occurrence.

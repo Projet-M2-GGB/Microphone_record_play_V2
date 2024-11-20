@@ -6,15 +6,18 @@
 # Add inputs and outputs from these tool invocations to the build variables 
 C_SRCS += \
 ../Drivers/BSP/STM32746G-Discovery/stm32746g_discovery.c \
-../Drivers/BSP/STM32746G-Discovery/stm32746g_discovery_audio.c 
+../Drivers/BSP/STM32746G-Discovery/stm32746g_discovery_audio.c \
+../Drivers/BSP/STM32746G-Discovery/stm32746g_discovery_sdram.c 
 
 OBJS += \
 ./Drivers/BSP/STM32746G-Discovery/stm32746g_discovery.o \
-./Drivers/BSP/STM32746G-Discovery/stm32746g_discovery_audio.o 
+./Drivers/BSP/STM32746G-Discovery/stm32746g_discovery_audio.o \
+./Drivers/BSP/STM32746G-Discovery/stm32746g_discovery_sdram.o 
 
 C_DEPS += \
 ./Drivers/BSP/STM32746G-Discovery/stm32746g_discovery.d \
-./Drivers/BSP/STM32746G-Discovery/stm32746g_discovery_audio.d 
+./Drivers/BSP/STM32746G-Discovery/stm32746g_discovery_audio.d \
+./Drivers/BSP/STM32746G-Discovery/stm32746g_discovery_sdram.d 
 
 
 # Each subdirectory must supply rules for building sources it contributes
@@ -24,7 +27,7 @@ Drivers/BSP/STM32746G-Discovery/%.o Drivers/BSP/STM32746G-Discovery/%.su Drivers
 clean: clean-Drivers-2f-BSP-2f-STM32746G-2d-Discovery
 
 clean-Drivers-2f-BSP-2f-STM32746G-2d-Discovery:
-	-$(RM) ./Drivers/BSP/STM32746G-Discovery/stm32746g_discovery.cyclo ./Drivers/BSP/STM32746G-Discovery/stm32746g_discovery.d ./Drivers/BSP/STM32746G-Discovery/stm32746g_discovery.o ./Drivers/BSP/STM32746G-Discovery/stm32746g_discovery.su ./Drivers/BSP/STM32746G-Discovery/stm32746g_discovery_audio.cyclo ./Drivers/BSP/STM32746G-Discovery/stm32746g_discovery_audio.d ./Drivers/BSP/STM32746G-Discovery/stm32746g_discovery_audio.o ./Drivers/BSP/STM32746G-Discovery/stm32746g_discovery_audio.su
+	-$(RM) ./Drivers/BSP/STM32746G-Discovery/stm32746g_discovery.cyclo ./Drivers/BSP/STM32746G-Discovery/stm32746g_discovery.d ./Drivers/BSP/STM32746G-Discovery/stm32746g_discovery.o ./Drivers/BSP/STM32746G-Discovery/stm32746g_discovery.su ./Drivers/BSP/STM32746G-Discovery/stm32746g_discovery_audio.cyclo ./Drivers/BSP/STM32746G-Discovery/stm32746g_discovery_audio.d ./Drivers/BSP/STM32746G-Discovery/stm32746g_discovery_audio.o ./Drivers/BSP/STM32746G-Discovery/stm32746g_discovery_audio.su ./Drivers/BSP/STM32746G-Discovery/stm32746g_discovery_sdram.cyclo ./Drivers/BSP/STM32746G-Discovery/stm32746g_discovery_sdram.d ./Drivers/BSP/STM32746G-Discovery/stm32746g_discovery_sdram.o ./Drivers/BSP/STM32746G-Discovery/stm32746g_discovery_sdram.su
 
 .PHONY: clean-Drivers-2f-BSP-2f-STM32746G-2d-Discovery
 

@@ -30,6 +30,7 @@
 "./Drivers/BSP/Components/wm8994/wm8994.o"
 "./Drivers/BSP/STM32746G-Discovery/stm32746g_discovery.o"
 "./Drivers/BSP/STM32746G-Discovery/stm32746g_discovery_audio.o"
+"./Drivers/BSP/STM32746G-Discovery/stm32746g_discovery_sdram.o"
 "./Drivers/STM32F7xx_HAL_Driver/Src/stm32f7xx_hal.o"
 "./Drivers/STM32F7xx_HAL_Driver/Src/stm32f7xx_hal_cortex.o"
 "./Drivers/STM32F7xx_HAL_Driver/Src/stm32f7xx_hal_dma.o"
