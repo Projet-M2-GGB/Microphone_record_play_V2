@@ -9,7 +9,7 @@
 ../Core/Src/stm32f7xx_it.c:194:6:SysTick_Handler	1
 ../Core/Src/stm32f7xx_it.c:215:6:EXTI15_10_IRQHandler	1
 ../Core/Src/stm32f7xx_it.c:229:6:DMA2_Stream1_IRQHandler	1
-../Core/Src/stm32f7xx_it.c:243:6:DMA2_Stream4_IRQHandler	1
-../Core/Src/stm32f7xx_it.c:255:6:DMA2_Stream7_IRQHandler	1
-../Core/Src/stm32f7xx_it.c:261:6:AUDIO_OUT_SAIx_DMAx_IRQHandler	1
-../Core/Src/stm32f7xx_it.c:268:6:BSP_SDRAM_DMA_IRQHandler	1
+../Core/Src/stm32f7xx_it.c:242:6:DMA2_Stream4_IRQHandler	1
+../Core/Src/stm32f7xx_it.c:254:6:DMA2_Stream7_IRQHandler	1
+../Core/Src/stm32f7xx_it.c:260:6:AUDIO_OUT_SAIx_DMAx_IRQHandler	1
+../Core/Src/stm32f7xx_it.c:266:6:BSP_SDRAM_DMA_IRQHandler	1

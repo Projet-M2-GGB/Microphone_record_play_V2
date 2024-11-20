@@ -239,7 +239,6 @@ void DMA2_Stream1_IRQHandler(void)
 /**
   * @brief This function handles DMA2 stream4 global interrupt.
   */
-
 void DMA2_Stream4_IRQHandler(void)
 {
   /* USER CODE BEGIN DMA2_Stream4_IRQn 0 */

@@ -168,8 +168,11 @@ int main(void)
   MX_USART1_UART_Init();
   MX_SAI1_Init();
   MX_FMC_Init();
-  BSP_SDRAM_Init();
+
   /* USER CODE BEGIN 2 */
+
+  /* Initialize SDRAM */
+  BSP_SDRAM_Init();
 
   /* Initialize Audio Recorder */
 	if (BSP_AUDIO_IN_Init(DEFAULT_AUDIO_IN_FREQ, DEFAULT_AUDIO_IN_BIT_RESOLUTION, DEFAULT_AUDIO_IN_CHANNEL_NBR) == AUDIO_OK)
@@ -260,6 +263,10 @@ int main(void)
 		  }
 		  printf("stopped recording\r\n");
 		  BSP_AUDIO_IN_Stop(CODEC_PDWN_SW);
+
+		  for (int i = 0; i < 512; i++) {
+		      printf("SDRAM Data[%d]: %02X\r\n", i, ((uint8_t *)AUDIO_REC_START_ADDR)[i]);
+		  }
 
 		  printf("playing recording...\r\n");
 		  /* -----------Start Playback -------------- */
